@@ -19,6 +19,9 @@ Para solucionar este problema prueben instalando `dos2unix` y pasarle el script.
 dos2unix infosecmachines.sh
 ```
 
-###### Basado en la hoja de cálculo [Planning de Estudio con S4vitar [Preparación OSCP, OSED, OSWE, OSEP, eJPT, eWPT, eWPTXv2, eCPPTv2, eCPTXv2]](https://docs.google.com/spreadsheets/d/1dzvaGlT_0xnT-PGO27Z_4prHgA8PHIpErmoWdlUrSoA/edit#gid=0) creado por S4vitar y en la web [https://infosecmachines.io/](https://infosecmachines.io/) creada por [JavierMolines](https://github.com/JavierMolines/)
+##### Basado en:
+###### - El Excel [Planning de Estudio con S4vitar [Preparación OSCP, OSED, OSWE, OSEP, eJPT, eWPT, eWPTXv2, eCPPTv2, eCPTXv2]](https://docs.google.com/spreadsheets/d/1dzvaGlT_0xnT-PGO27Z_4prHgA8PHIpErmoWdlUrSoA/edit#gid=0) creado por S4vitar.
+###### - La web [https://infosecmachines.io/](https://infosecmachines.io/) creada por [JavierMolines](https://github.com/JavierMolines/).
+###### - La web [https://htbmachines.github.io/](https://htbmachines.github.io/) creada por [rroderickk](https://github.com/rroderickk).
 
-###### Creado por [n0m3l4c000nt35](https://github.com/n0m3l4c000nt35) ♥ para la comunidad de [Hack4u](https://hack4u.io/)
+#### Creado por [n0m3l4c000nt35](https://github.com/n0m3l4c000nt35) ♥ para la comunidad de [Hack4u](https://hack4u.io/)
