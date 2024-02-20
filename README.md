@@ -18,3 +18,5 @@ Para solucionar este problema prueben instalando `dos2unix` y pasarle el script.
 ```shell
 dos2unix infosecmachines.sh
 ```
+
+Creado por [n0m3l4c000nt35](https://github.com/n0m3l4c000nt35) ♥ para la comunidad de [Hack4u](https://hack4u.io/)
