@@ -1,2 +1,5 @@
-# infosecmachines
-Script en bash para listar y filtrar las máquinas resueltas por S4vitar
+## Descargar
+
+```shell
+wget https://raw.githubusercontent.com/n0m3l4c000nt35/infosecmachines/main/infosecmachines.sh
+```
