@@ -10,6 +10,8 @@ purpleColour="\e[0;35m\033[1m"
 turquoiseColour="\e[0;36m\033[1m"
 grayColour="\e[0;37m\033[1m"
 
+filename_json="htbmachines.json"
+
 function ctrl_c(){
   echo -e "\n${redColour}[!] Saliendo...${endColour}"
   tput cnorm && exit 1
@@ -22,6 +24,7 @@ main_url="https://docs.google.com/spreadsheets/u/0/d/1dzvaGlT_0xnT-PGO27Z_4prHgA
 function help_panel(){
   echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Uso:${endColour}"
   echo -e "\t${purpleColour}u)${endColour} ${grayColour}Descargar o actualizar archivos necesarios${endColour}"
+  echo -e "\t${purpleColour}a)${endColour} ${grayColour}Listar todas las máquinas${endColour}"
   echo -e "\t${purpleColour}m)${endColour} ${grayColour}Buscar por nombre de máquina${endColour}"
   echo -e "\t${purpleColour}i)${endColour} ${grayColour}Buscar por dirección IP${endColour}"
   echo -e "\t${purpleColour}o)${endColour} ${grayColour}Buscar por el sistema operativo${endColour}"
@@ -33,7 +36,8 @@ function help_panel(){
 
 function update_files(){
   tput civis
-  if [ ! -f htbmachines.json ]; then
+
+  if [ ! -f "$filename_json" ]; then
     echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Descargando archivos necesarios...${endColour}"
     sleep 1
     curl -s -X GET "$main_url" | sed 's/\/\*O_o\*\///' | grep -v '^$' | sed 's/google.visualization.Query.setResponse(//' | sed 's/);$//' | sed 's/,"parsedNumHeaders":0//' | jq 'del(.table.rows.[0,1])' | jq '.table.rows' > htbmachines.json
@@ -57,8 +61,22 @@ function update_files(){
   tput cnorm
 }
 
+function all_machines(){
+  tput civis
+  
+  check_files
+
+  echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Listando todas las máquinas:${endColour}\n"
+
+  jq -r 'map(del(.[].[1,2,3,4,5,6,7])) | .[].c.[0].v' htbmachines.json | sort | column
+
+  tput cnorm
+}
+
 function search_machine(){
   tput civis
+
+  check_files
 
   machine_name="$1"
   check_machine_name="$(jq --arg searched_machine "$machine_name" 'map(del(.[].[1,2,3,4,5,6,7])) | map(select(.[].[0].v | test("\\b\($searched_machine)\\b"; "i"))) | length' htbmachines.json)"
@@ -87,6 +105,8 @@ function search_machine(){
 function search_ip(){
   tput civis
 
+  check_files
+
   ip_address="$1"
   check_ip_address="$(jq --arg searched_ip "$ip_address" 'map(del(.[].[2,3,4,5,6,7])) | map(select(.[].[1].v | test("\\b\($searched_ip)\\b"; "i"))) | length' htbmachines.json)"
 
@@ -103,6 +123,8 @@ function search_ip(){
 function get_os_machines(){
   tput civis
 
+  check_files
+
   os="$1"
   check_os="$(jq -r --arg searched_os "$os" 'map(del(.[].[1,3,4,5,6,7])) | [.[].c.[1].v] | unique | map(select(. | test("\\b\($searched_os)\\b"; "i"))) | length' htbmachines.json)"
 
@@ -117,6 +139,8 @@ function get_os_machines(){
 
 function get_machines_difficulty(){
   tput civis
+
+  check_files
 
   difficulty="$1"
   check_difficulty="$(jq -r --arg searched_difficulty "$difficulty" 'map(del(.[].[1,2,4,5,6,7])) | [.[].c.[1].v] | unique | map(select(. | test("\\b\($searched_difficulty)\\b"; "i"))) | length' htbmachines.json)"
@@ -133,8 +157,10 @@ function get_machines_difficulty(){
 }
 
 function get_skill(){
-
   tput civis
+
+  check_files
+
   skill="$1"
   check_skill="$(jq --arg searched_skill "$skill" 'map(del(.[].[1,2,3,5,6,7]) | .[].[1].v |= split("\n")) | map(select(.[].[1].v[] | test("\\b\($searched_skill)\\b"; "i"))) | length' htbmachines.json)"
 
@@ -149,6 +175,8 @@ function get_skill(){
 
 function get_cert(){
   tput civis
+
+  check_files
 
   cert="$1"
   check_cert="$(jq --arg searched_cert "$cert" 'map(del(.[].[1,2,3,4,6,7]) | .[].[1].v |= split("\n")) | map(select(.[].[1].v[] | test("\\b\($searched_cert)\\b"; "i"))) | length' htbmachines.json)"
@@ -166,6 +194,8 @@ function get_cert(){
 function get_youtube_link(){
   tput civis
 
+  check_files
+
   machine_name="$1"
   check_machine_name="$(jq --arg searched_machine "$machine_name" 'map(del(.[].[1,2,3,4,5,7])) | map(select(.[].[0].v | test("\\b\($searched_machine)\\b"; "i"))) | length' htbmachines.json)"
 
@@ -181,6 +211,8 @@ function get_youtube_link(){
 
 function get_difficulty_os(){
   tput civis
+
+  check_files
 
   difficulty="$1"
   os="$2"
@@ -198,20 +230,29 @@ function get_difficulty_os(){
   tput cnorm
 }
 
+function check_files(){
+  if [ ! -f "$filename_json" ]; then
+    echo -e "\n${redColour}[!]${endColour} ${grayColour}Necesitas descargar los archivos necesarios. Utiliza la flag${endColour} ${blueColour}-u${endColour}${grayColour}.${endColour}"
+    tput cnorm
+    exit 1
+  fi
+}
+
 declare -i parameter_counter=0
 declare -i difficulty_wd=0
 declare -i os_wd=0
 
-while getopts "um:i:o:d:s:c:y:h" arg; do
+while getopts "uam:i:o:d:s:c:y:h" arg; do
   case $arg in
     u) let parameter_counter+=1;;
-    m) machine_name="$OPTARG"; let parameter_counter+=2;;
-    i) ip_address="$OPTARG"; let parameter_counter+=3;;
-    o) os="$OPTARG"; os_wd=1; let parameter_counter+=4;;
-    d) difficulty="$OPTARG"; difficulty_wd=1; let parameter_counter+=5;;
-    s) skill="$OPTARG"; let parameter_counter+=6;;
-    c) cert="$OPTARG"; let parameter_counter+=7;;
-    y) machine_name="$OPTARG"; let parameter_counter+=8;;
+    a) let parameter_counter+=2;;
+    m) machine_name="$OPTARG"; let parameter_counter+=3;;
+    i) ip_address="$OPTARG"; let parameter_counter+=4;;
+    o) os="$OPTARG"; os_wd=1; let parameter_counter+=5;;
+    d) difficulty="$OPTARG"; difficulty_wd=1; let parameter_counter+=6;;
+    s) skill="$OPTARG"; let parameter_counter+=7;;
+    c) cert="$OPTARG"; let parameter_counter+=8;;
+    y) machine_name="$OPTARG"; let parameter_counter+=9;;
     h) ;;
   esac
 done
@@ -219,18 +260,20 @@ done
 if [ $parameter_counter -eq 1 ]; then
   update_files
 elif [ $parameter_counter -eq 2 ]; then
-  search_machine $machine_name
+  all_machines
 elif [ $parameter_counter -eq 3 ]; then
-  search_ip $ip_address
+  search_machine $machine_name
 elif [ $parameter_counter -eq 4 ]; then
-  get_os_machines $os
+  search_ip $ip_address
 elif [ $parameter_counter -eq 5 ]; then
-  get_machines_difficulty $difficulty
+  get_os_machines $os
 elif [ $parameter_counter -eq 6 ]; then
-  get_skill "$skill"
+  get_machines_difficulty $difficulty
 elif [ $parameter_counter -eq 7 ]; then
-  get_cert "$cert"
+  get_skill "$skill"
 elif [ $parameter_counter -eq 8 ]; then
+  get_cert "$cert"
+elif [ $parameter_counter -eq 9 ]; then
   get_youtube_link "$machine_name"
 elif [ $difficulty_wd -eq 1 ] && [ $os_wd -eq 1 ]; then
   get_difficulty_os $difficulty $os
