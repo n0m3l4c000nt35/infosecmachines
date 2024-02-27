@@ -40,13 +40,13 @@ function update_files(){
   if [ ! -f "$filename_json" ]; then
     echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Descargando archivos necesarios...${endColour}"
     sleep 1
-    curl -s -X GET "$main_url" | sed 's/\/\*O_o\*\///' | grep -v '^$' | sed 's/google.visualization.Query.setResponse(//' | sed 's/);$//' | sed 's/,"parsedNumHeaders":0//' | jq 'del(.table.rows.[0,1])' | jq '.table.rows' > htbmachines.json
+    curl -s -X GET "$main_url" | sed 's/\/\*O_o\*\///' | grep -v '^$' | sed 's/google.visualization.Query.setResponse(//' | sed 's/);$//' | sed 's/,"parsedNumHeaders":0//' | jq 'del(.table.rows.[0,1])' | jq '.table.rows' > "$filename_json"
     echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Todos los archivos han sido descargados...${endColour}"
   else
     echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Comprobando si hay actualizaciones pendientes...${endColour}"
     sleep 1
     curl -s -X GET "$main_url" | sed 's/\/\*O_o\*\///' | grep -v '^$' | sed 's/google.visualization.Query.setResponse(//' | sed 's/);$//' | sed 's/,"parsedNumHeaders":0//' | jq 'del(.table.rows.[0,1])' | jq '.table.rows' > htbmachines_temp.json
-    md5_machines="$(md5sum htbmachines.json | awk '{print $1}')"
+    md5_machines="$(md5sum "$filename_json" | awk '{print $1}')"
     md5_machines_temp="$(md5sum htbmachines_temp.json | awk '{print $1}')"
     if [ "$md5_machines" == "$md5_machines_temp" ]; then
       echo -e "\n${yellowColour}[+]${endColour} ${grayColour}No se han detectado actualizaciones, lo tienes todo al día ;)${endColour}"
@@ -54,7 +54,7 @@ function update_files(){
     else
       echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Se han encontrado actualizaciones disponibles${endColour}"
       sleep 1
-      rm htbmachines.json && mv htbmachines_temp.json htbmachines.json
+      rm "$filename_json" && mv htbmachines_temp.json "$filename_json"
       echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Los archivos han sido actualizados${endColour}"
     fi
   fi
@@ -68,7 +68,7 @@ function all_machines(){
 
   echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Listando todas las máquinas:${endColour}\n"
 
-  jq -r 'map(del(.[].[1,2,3,4,5,6,7])) | .[].c.[0].v' htbmachines.json | sort | column
+  jq -r 'map(del(.[].[1,2,3,4,5,6,7])) | .[].c.[0].v' "$filename_json" | sort | column
 
   tput cnorm
 }
@@ -79,12 +79,12 @@ function search_machine(){
   check_files
 
   machine_name="$1"
-  check_machine_name="$(jq --arg searched_machine "$machine_name" 'map(del(.[].[1,2,3,4,5,6,7])) | map(select(.[].[0].v | test("\\b\($searched_machine)\\b"; "i"))) | length' htbmachines.json)"
+  check_machine_name="$(jq --arg searched_machine "$machine_name" 'map(del(.[].[1,2,3,4,5,6,7])) | map(select(.[].[0].v | test("\\b\($searched_machine)\\b"; "i"))) | length' "$filename_json")"
 
   if [ $check_machine_name -ne 0 ]; then
 
     echo -e "\n${yellowColour}[+] ${grayColour}Listando las propiedades de la máquina${endColour} ${blueColour}$machine_name${endColour}${grayColour}:${endColour}\n"
-    machine="$(jq --arg searched_machine "$machine_name" 'map(del(.[].[7])) | map(select(.[].[0].v | test("\\b\($searched_machine)\\b"; "i"))) | [.[].c[]]' htbmachines.json)"
+    machine="$(jq --arg searched_machine "$machine_name" 'map(del(.[].[7])) | map(select(.[].[0].v | test("\\b\($searched_machine)\\b"; "i"))) | [.[].c[]]' "$filename_json")"
     keys=("Máquina" "Dirección IP" "Sistema Operativo" "Dificultad" "Skills" "Certificaciones" "Writeup")
 
     echo -e "${grayColour}${keys[0]}:${endColour} $(echo "$machine" | jq -r '.[0].v')"
@@ -108,10 +108,10 @@ function search_ip(){
   check_files
 
   ip_address="$1"
-  check_ip_address="$(jq --arg searched_ip "$ip_address" 'map(del(.[].[2,3,4,5,6,7])) | map(select(.[].[1].v | test("\\b\($searched_ip)\\b"; "i"))) | length' htbmachines.json)"
+  check_ip_address="$(jq --arg searched_ip "$ip_address" 'map(del(.[].[2,3,4,5,6,7])) | map(select(.[].[1].v | test("\\b\($searched_ip)\\b"; "i"))) | length' "$filename_json")"
 
   if [ $check_ip_address -ne 0 ]; then
-    machine_found="$(jq -r --arg searched_machine "$ip_address" 'map(del(.[].[2,3,4,5,6,7])) | map(select(.[].[1].v | test("\\b\($searched_machine)\\b"))) | .[].c.[0].v' htbmachines.json)"
+    machine_found="$(jq -r --arg searched_machine "$ip_address" 'map(del(.[].[2,3,4,5,6,7])) | map(select(.[].[1].v | test("\\b\($searched_machine)\\b"))) | .[].c.[0].v' "$filename_json")"
     echo -e "\n${yellowColour}[+]${endColour} ${grayColour}La máquina correspondiente para la IP${endColour} ${blueColour}$ip_address${endColour} ${grayColour}es:${endColour} ${purpleColour}$machine_found${endColour}"
   else
     echo -e "\n${redColour}[!] La dirección IP proporcionada no existe${endColour}"
@@ -126,11 +126,11 @@ function get_os_machines(){
   check_files
 
   os="$1"
-  check_os="$(jq -r --arg searched_os "$os" 'map(del(.[].[1,3,4,5,6,7])) | [.[].c.[1].v] | unique | map(select(. | test("\\b\($searched_os)\\b"; "i"))) | length' htbmachines.json)"
+  check_os="$(jq -r --arg searched_os "$os" 'map(del(.[].[1,3,4,5,6,7])) | [.[].c.[1].v] | unique | map(select(. | test("\\b\($searched_os)\\b"; "i"))) | length' "$filename_json")"
 
   if [ $check_os -ne 0 ]; then
     echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Mostrando las máquinas cuyo sistema operativo es${endColour} ${blueColour}$os${endColour}${grayColour}:${endColour}\n"
-    jq -r --arg searched_os "$os" 'map(del(.[].[1,3,4,5,6,7])) | map(select(.[].[1].v | test("\\b\($searched_os)\\b"; "i"))) | .[].c.[0].v' htbmachines.json | sort -u | column
+    jq -r --arg searched_os "$os" 'map(del(.[].[1,3,4,5,6,7])) | map(select(.[].[1].v | test("\\b\($searched_os)\\b"; "i"))) | .[].c.[0].v' "$filename_json" | sort -u | column
   else
     echo -e "\n${redColour}[!] El sistema operativo indicado no existe${endColour}"
   fi
@@ -143,11 +143,11 @@ function get_machines_difficulty(){
   check_files
 
   difficulty="$1"
-  check_difficulty="$(jq -r --arg searched_difficulty "$difficulty" 'map(del(.[].[1,2,4,5,6,7])) | [.[].c.[1].v] | unique | map(select(. | test("\\b\($searched_difficulty)\\b"; "i"))) | length' htbmachines.json)"
+  check_difficulty="$(jq -r --arg searched_difficulty "$difficulty" 'map(del(.[].[1,2,4,5,6,7])) | [.[].c.[1].v] | unique | map(select(. | test("\\b\($searched_difficulty)\\b"; "i"))) | length' "$filename_json")"
 
   if [ $check_difficulty -ne 0 ]; then
     echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Mostrando las máquinas que poseen un nivel de dificultad${endColour} ${blueColour}$difficulty${endColour}${grayColour}:${endColour}\n"
-    jq -r --arg searched_difficulty "$difficulty" 'map(del(.[].[1,2,4,5,6,7])) | map(select(.[].[1].v | test("\\b\($searched_difficulty)\\b"; "i"))) | .[].c.[0].v' htbmachines.json | sort -u | column
+    jq -r --arg searched_difficulty "$difficulty" 'map(del(.[].[1,2,4,5,6,7])) | map(select(.[].[1].v | test("\\b\($searched_difficulty)\\b"; "i"))) | .[].c.[0].v' "$filename_json" | sort -u | column
   else
     echo -e "\n${redColour}[!] La dificultad indicada no existe${endColour}\n"
     echo -e "${grayColour}Selecciona una de las siguientes dificultades:${endColour}\n\n ${grayColour}-${endColour} ${greenColour}Fácil${endColour}\n ${grayColour}-${endColour} ${yellowColour}Media${endColour}\n ${grayColour}-${endColour} ${purpleColour}Difícil${endColour}\n ${grayColour}-${endColour} ${redColour}Insane${endColour}"
@@ -162,11 +162,11 @@ function get_skill(){
   check_files
 
   skill="$1"
-  check_skill="$(jq --arg searched_skill "$skill" 'map(del(.[].[1,2,3,5,6,7]) | .[].[1].v |= split("\n")) | map(select(.[].[1].v[] | test("\\b\($searched_skill)\\b"; "i"))) | length' htbmachines.json)"
+  check_skill="$(jq --arg searched_skill "$skill" 'map(del(.[].[1,2,3,5,6,7]) | .[].[1].v |= split("\n")) | map(select(.[].[1].v[] | test("\\b\($searched_skill)\\b"; "i"))) | length' "$filename_json")"
 
   if [ $check_skill -ne 0 ]; then
     echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Mostrando las máquinas donde se ve la skill${endColour} ${blueColour}$skill${endColour}${grayColour}:${endColour}\n"
-    jq -r --arg searched_skill "$skill" 'map(del(.[].[1,2,3,5,6,7]) | .[].[1].v |= split("\n")) | map(select(.[].[1].v[] | test("\\b\($searched_skill)\\b"; "i"))) | unique | .[].c.[0].v' htbmachines.json | column
+    jq -r --arg searched_skill "$skill" 'map(del(.[].[1,2,3,5,6,7]) | .[].[1].v |= split("\n")) | map(select(.[].[1].v[] | test("\\b\($searched_skill)\\b"; "i"))) | unique | .[].c.[0].v' "$filename_json" | column
   else
     echo -e "\n${redColour}[!] No se ha encontrado ninguna máquina con la skill indicada${endColour}"
   fi
@@ -179,11 +179,11 @@ function get_cert(){
   check_files
 
   cert="$1"
-  check_cert="$(jq --arg searched_cert "$cert" 'map(del(.[].[1,2,3,4,6,7]) | .[].[1].v |= split("\n")) | map(select(.[].[1].v[] | test("\\b\($searched_cert)\\b"; "i"))) | length' htbmachines.json)"
+  check_cert="$(jq --arg searched_cert "$cert" 'map(del(.[].[1,2,3,4,6,7]) | .[].[1].v |= split("\n")) | map(select(.[].[1].v[] | test("\\b\($searched_cert)\\b"; "i"))) | length' "$filename_json")"
 
   if [ $check_cert -ne 0 ]; then
     echo -e "\n${yellowColour}[+]${endColour} ${grayColour}A continuación se presentan las máquinas que te preparan para la certificación${endColour} ${blueColour}$cert${endColour}${grayColour}:${endColour}\n"
-    jq -r --arg searched_cert "$cert" 'map(del(.[].[1,2,3,4,6,7]) | .[].[1].v |= split("\n")) | map(select(.[].[1].v[] | test("\\b\($searched_cert)\\b"; "i"))) | unique | .[].c.[0].v' htbmachines.json | column
+    jq -r --arg searched_cert "$cert" 'map(del(.[].[1,2,3,4,6,7]) | .[].[1].v |= split("\n")) | map(select(.[].[1].v[] | test("\\b\($searched_cert)\\b"; "i"))) | unique | .[].c.[0].v' "$filename_json" | column
   else
     echo -e "\n${redColour}[!] No se ha encontrado ninguna máquina para la certificación indicada${endColour}"
   fi
@@ -197,11 +197,11 @@ function get_youtube_link(){
   check_files
 
   machine_name="$1"
-  check_machine_name="$(jq --arg searched_machine "$machine_name" 'map(del(.[].[1,2,3,4,5,7])) | map(select(.[].[0].v | test("\\b\($searched_machine)\\b"; "i"))) | length' htbmachines.json)"
+  check_machine_name="$(jq --arg searched_machine "$machine_name" 'map(del(.[].[1,2,3,4,5,7])) | map(select(.[].[0].v | test("\\b\($searched_machine)\\b"; "i"))) | length' "$filename_json")"
 
   if [ $check_machine_name -ne 0 ]; then
     echo -e "\n${yellowColour}[+]${endColour} ${grayColour}El tutorial para la máquina${endColour} ${blueColour}$machine_name${endColour}${grayColour} está en el siguiente enlace:${endColour}\n"
-    echo -e "${purpleColour}$(jq -r --arg searched_machine "$machine_name" 'map(del(.[].[1,2,3,4,5,7])) | map(select(.[].[0].v | test("\\b\($searched_machine)\\b"; "i"))) | .[].c.[1].v' htbmachines.json)${endColour}"
+    echo -e "${purpleColour}$(jq -r --arg searched_machine "$machine_name" 'map(del(.[].[1,2,3,4,5,7])) | map(select(.[].[0].v | test("\\b\($searched_machine)\\b"; "i"))) | .[].c.[1].v' "$filename_json")${endColour}"
   else
     echo -e "\n${redColour}[!] La máquina proporcionada no existe${endColour}"
   fi
@@ -217,12 +217,12 @@ function get_difficulty_os(){
   difficulty="$1"
   os="$2"
 
-  check_difficulty="$(jq -r --arg searched_difficulty "$difficulty" 'map(del(.[].[1,2,4,5,6,7])) | [.[].c.[1].v] | unique | map(select(. | test("\\b\($searched_difficulty)\\b"; "i"))) | length' htbmachines.json)"
-  check_os="$(jq -r --arg searched_os "$os" 'map(del(.[].[1,3,4,5,6,7])) | [.[].c.[1].v] | unique | map(select(. | test("\\b\($searched_os)\\b"; "i"))) | length' htbmachines.json)"
+  check_difficulty="$(jq -r --arg searched_difficulty "$difficulty" 'map(del(.[].[1,2,4,5,6,7])) | [.[].c.[1].v] | unique | map(select(. | test("\\b\($searched_difficulty)\\b"; "i"))) | length' "$filename_json")"
+  check_os="$(jq -r --arg searched_os "$os" 'map(del(.[].[1,3,4,5,6,7])) | [.[].c.[1].v] | unique | map(select(. | test("\\b\($searched_os)\\b"; "i"))) | length' "$filename_json")"
 
   if [ $check_difficulty -ne 0 ] && [ $check_os -ne 0 ]; then
     echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Listando máquinas de dificultad${endColour} ${blueColour}$difficulty${endColour} ${grayColour}que tengan el sistema operativo${endColour} ${purpleColour}$os${endColour}${yellowColour}:${endColour}\n"
-    echo -e "$(jq -r --arg searched_difficulty "$difficulty" --arg searched_os "$os" 'map(del(.[].[1,4,5,6,7])) | map(select(.[].[2].v | test("\\b\($searched_difficulty)\\b"; "i"))) | map(select(.[].[1].v | test("\\b\($searched_os)\\b"; "i"))) | .[].c.[0].v' htbmachines.json | column)"
+    echo -e "$(jq -r --arg searched_difficulty "$difficulty" --arg searched_os "$os" 'map(del(.[].[1,4,5,6,7])) | map(select(.[].[2].v | test("\\b\($searched_difficulty)\\b"; "i"))) | map(select(.[].[1].v | test("\\b\($searched_os)\\b"; "i"))) | .[].c.[0].v' "$filename_json" | column)"
   else
     echo -e "\n${redColour}[!] Se ha indicado una dificultad o sistema operativo incorrectos${endColour}"
   fi
