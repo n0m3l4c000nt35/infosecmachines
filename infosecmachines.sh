@@ -189,10 +189,10 @@ function get_difficulty_os(){
   check_os="$(jq -r --arg searched_os "$os" 'map(del(.[].[1,3,4,5,6,7])) | [.[].c.[1].v] | unique | map(select(. | test("\\b\($searched_os)\\b"; "i"))) | length' htbmachines.json)"
 
   if [ $check_difficulty -ne 0 ] && [ $check_os -ne 0 ]; then
-    echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Listando máquinas de dificultad${endColour} ${blueColour}$difficulty${endColour} ${yellowColour}que tengan el sistema operativo${endColour} ${purpleColour}$os${endColour}${yellowColour}:${endColour}\n"
+    echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Listando máquinas de dificultad${endColour} ${blueColour}$difficulty${endColour} ${grayColour}que tengan el sistema operativo${endColour} ${purpleColour}$os${endColour}${yellowColour}:${endColour}\n"
     echo -e "$(jq -r --arg searched_difficulty "$difficulty" --arg searched_os "$os" 'map(del(.[].[1,4,5,6,7])) | map(select(.[].[2].v | test("\\b\($searched_difficulty)\\b"; "i"))) | map(select(.[].[1].v | test("\\b\($searched_os)\\b"; "i"))) | .[].c.[0].v' htbmachines.json | column)"
   else
-    echo -e "[!] Se ha indicado una dificultad o sistema operativo incorrectos"
+    echo -e "\n${redColour}[!] Se ha indicado una dificultad o sistema operativo incorrectos${endColour}"
   fi
 
   tput cnorm
