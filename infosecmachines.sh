@@ -51,7 +51,7 @@ function search_machine(){
   if [ -n "$check_machine_name" ]; then
 
     echo -e "\n${yellowColour}[+] ${grayColour}Listando las propiedades de la máquina${endColour} ${blueColour}$machine_name${endColour}${grayColour}:${endColour}\n"
-    keys=("Máquina" "Dirección IP" "Sistema Operativo" "Dificultad" "Skills" "Certificaciones" "Writeup" "Plataforma")
+    keys=("Máquina" "Dirección IP" "Sistema Operativo" "Dificultad" "Técnicas" "Certificaciones" "Writeup" "Plataforma")
 
     echo -e "${grayColour}${keys[0]}:${endColour} $(echo "$check_machine_name" | jq -r '.name')"
     echo -e "${grayColour}${keys[1]}:${endColour} $(echo "$check_machine_name" | jq -r '.ip')"
