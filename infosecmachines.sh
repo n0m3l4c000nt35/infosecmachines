@@ -29,6 +29,7 @@ function help_panel(){
   echo -e "\t${purpleColour}t)${endColour} ${grayColour}Buscar por técnica${endColour}"
   echo -e "\t${purpleColour}c)${endColour} ${grayColour}Buscar por certificación${endColour}"
   echo -e "\t${purpleColour}y)${endColour} ${grayColour}Obtener link de la resolución de la máquina en YouTube${endColour}"
+  echo -e "\t${purpleColour}p)${endColour} ${grayColour}Listar máquinas por plataforma${endColour}"
 }
 
 function all_machines(){
@@ -50,7 +51,7 @@ function search_machine(){
   if [ -n "$check_machine_name" ]; then
 
     echo -e "\n${yellowColour}[+] ${grayColour}Listando las propiedades de la máquina${endColour} ${blueColour}$machine_name${endColour}${grayColour}:${endColour}\n"
-    keys=("Máquina" "Dirección IP" "Sistema Operativo" "Dificultad" "Skills" "Certificaciones" "Writeup")
+    keys=("Máquina" "Dirección IP" "Sistema Operativo" "Dificultad" "Skills" "Certificaciones" "Writeup" "Plataforma")
 
     echo -e "${grayColour}${keys[0]}:${endColour} $(echo "$check_machine_name" | jq -r '.name')"
     echo -e "${grayColour}${keys[1]}:${endColour} $(echo "$check_machine_name" | jq -r '.ip')"
@@ -59,6 +60,7 @@ function search_machine(){
     echo -e "${grayColour}${keys[4]}:${endColour}"; echo "$(echo "$check_machine_name" | jq -r '.techniques')" | while read skill; do echo -e "  ${grayColour}-${endColour} $skill"; done
     echo -e "${grayColour}${keys[5]}:${endColour}"; echo "$(echo "$check_machine_name" | jq -r '.certification')" | while read cert; do echo -e "  ${grayColour}-${endColour} $cert"; done
     echo -e "${grayColour}${keys[6]}:${endColour} $(echo "$check_machine_name" | jq -r '.video')"
+    echo -e "${grayColour}${keys[7]}:${endColour} $(echo "$check_machine_name" | jq -r '.platform')"
 
   else
     echo -e "\n${redColour}[!] La máquina proporcionada no existe${endColour}\n"
@@ -182,11 +184,29 @@ function get_difficulty_os(){
   tput cnorm
 }
 
+function get_machines_by_platform(){
+  tput civis
+
+  platform="$1"
+
+  check_platform="$(curl -s "$API_URL" | jq -r --arg searched_platform "$platform" '.newData[] | select(.platform | test("\\b\($searched_platform)\\b"; "i"))')"
+
+  if [ -n "$check_platform" ]; then
+    echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Listando máquinas pertenecientes a la plataforma${endColour} ${blueColour}$platform${endColour}${grayColour}:${endColour}\n"
+    echo "$check_platform" | jq -r '.name' | sort | column
+  else
+    echo -e "\n${redColour}[!]${endColour} ${grayColour}La plataforma indicada no existe${endColour}"
+    echo -e "\n${grayColour}Selecciona una de las siguientes plataformas:${endColour}\n\n ${grayColour}-${endColour} ${greenColour}HackTheBox${endColour}\n ${grayColour}-${endColour} ${turquoiseColour}VulnHub${endColour}\n ${grayColour}-${endColour} ${yellowColour}PortSwigger${endColour}\n"
+  fi
+
+  tput cnorm
+}
+
 declare -i parameter_counter=0
 declare -i difficulty_wd=0
 declare -i os_wd=0
 
-while getopts "uam:i:o:d:t:c:y:h" arg; do
+while getopts "uam:i:o:d:t:c:y:p:h" arg; do
   case $arg in
     a) let parameter_counter+=1;;
     m) machine_name="$OPTARG"; let parameter_counter+=2;;
@@ -196,6 +216,7 @@ while getopts "uam:i:o:d:t:c:y:h" arg; do
     t) technique="$OPTARG"; let parameter_counter+=6;;
     c) certification="$OPTARG"; let parameter_counter+=7;;
     y) machine_name="$OPTARG"; let parameter_counter+=8;;
+    p) platform="$OPTARG"; let parameter_counter+=9;;
     h) ;;
   esac
 done
@@ -216,6 +237,8 @@ elif [ $parameter_counter -eq 7 ]; then
   get_certification "$certification"
 elif [ $parameter_counter -eq 8 ]; then
   get_youtube_link "$machine_name"
+elif [ $parameter_counter -eq 9 ]; then
+  get_machines_by_platform "$platform"
 elif [ $difficulty_wd -eq 1 ] && [ $os_wd -eq 1 ]; then
   get_difficulty_os $difficulty $os
 else
