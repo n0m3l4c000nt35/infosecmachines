@@ -63,7 +63,7 @@ function search_machine(){
     echo -e "${grayColour}${keys[7]}:${endColour} $(echo "$check_machine_name" | jq -r '.platform')"
 
   else
-    echo -e "\n${redColour}[!] La máquina proporcionada no existe${endColour}\n"
+    echo -e "\n${redColour}[!]${endColour} ${grayColour}La máquina proporcionada no existe${endColour}\n"
   fi
 
   tput cnorm
@@ -94,7 +94,7 @@ function get_os_machines(){
     echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Mostrando las máquinas cuyo sistema operativo es${endColour} ${blueColour}$os${endColour}${grayColour}:${endColour}\n"
     echo "$check_os" | sort | column
   else
-    echo -e "\n${redColour}[!] El sistema operativo indicado no existe${endColour}"
+    echo -e "\n${redColour}[!]${endColour} ${grayColour}El sistema operativo indicado no existe${endColour}"
   fi
 
   tput cnorm
@@ -159,7 +159,7 @@ function get_youtube_link(){
     echo -e "\n${yellowColour}[+]${endColour} ${grayColour}El tutorial para la máquina${endColour} ${blueColour}$machine_name${endColour}${grayColour} está en el siguiente enlace:${endColour}\n"
     echo -e "${purpleColour}$check_machine_name${endColour}" | sort | column
   else
-    echo -e "\n${redColour}[!] La máquina proporcionada no existe${endColour}"
+    echo -e "\n${redColour}[!]${endColour} ${grayColour}La máquina proporcionada no existe${endColour}"
   fi
 
   tput cnorm
