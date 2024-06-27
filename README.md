@@ -7,7 +7,7 @@ chmod +x infosecmachines.sh
 ```
 
 ##### Basado en:
-###### - El Excel [Planning de Estudio con S4vitar [Preparación OSCP, OSED, OSWE, OSEP, eJPT, eWPT, eWPTXv2, eCPPTv2, eCPTXv2]](https://docs.google.com/spreadsheets/d/1dzvaGlT_0xnT-PGO27Z_4prHgA8PHIpErmoWdlUrSoA/edit#gid=0) creado por S4vitar.
+###### - El Excel [Planning de Estudio con S4vitar [Preparación OSCP, OSED, OSWE, OSEP, eJPT, eWPT, eWPTXv2, eCPPTv2, eCPTXv2]](https://docs.google.com/spreadsheets/d/1dzvaGlT_0xnT-PGO27Z_4prHgA8PHIpErmoWdlUrSoA/edit#gid=0) creado por [S4vitar](https://github.com/s4vitar).
 ###### - La web [https://infosecmachines.io/](https://infosecmachines.io/) creada por [JavierMolines](https://github.com/JavierMolines/).
 ###### - La web [https://htbmachines.github.io/](https://htbmachines.github.io/) creada por [rroderickk](https://github.com/rroderickk).
 
