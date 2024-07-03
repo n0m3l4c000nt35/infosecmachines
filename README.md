@@ -52,7 +52,7 @@ chmod +x infosecmachines.sh
 ## Por si arroja algún error en la primera ejecución
 
 ```shell
- dos2unix infosecmachines.sh
+dos2unix infosecmachines.sh
 ```
 
 ##### Basado en:
