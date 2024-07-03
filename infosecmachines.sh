@@ -96,13 +96,19 @@ function search_machine(){
 }
 
 function search_ip(){
-  ip_address="$1"
-  check_ip_address="$(curl -s "$API_URL" | jq -r --arg searched_ip "$ip_address" '.newData[] | select(.ip | test("\\b\($searched_ip)\\b"; "i"))')"
-
-  if [ -n "$check_ip_address" ]; then
-    echo -e "\n${yellowColour}[+]${endColour} ${grayColour}La máquina correspondiente para la IP${endColour} ${blueColour}$ip_address${endColour} ${grayColour}es:${endColour} ${purpleColour}"$(echo "$check_ip_address" | jq -r '.name')"${endColour}"
+  if [ "$1" == "-l" ]; then
+    echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Listando todas las direcciones IP:${endColour}\n"
+    curl -s "$API_URL" | jq -r '.newData[] | select(.ip != null and .ip != "") | .ip' | sort -u | column
+    echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Total de IPs únicas:${endColour} ${greenColour}$(curl -s "$API_URL" | jq -r '.newData[] | select(.ip != null and .ip != "") | .ip' | sort -u | wc -l)${endColour}"
   else
-    echo -e "\n${redColour}[!]${endColour} ${grayColour}La dirección IP proporcionada no existe${endColour}"
+    ip_address="$1"
+    check_ip_address="$(curl -s "$API_URL" | jq -r --arg searched_ip "$ip_address" '.newData[] | select(.ip | test("\\b\($searched_ip)\\b"; "i"))')"
+
+    if [ -n "$check_ip_address" ]; then
+      echo -e "\n${yellowColour}[+]${endColour} ${grayColour}La máquina correspondiente para la IP${endColour} ${blueColour}$ip_address${endColour} ${grayColour}es:${endColour} ${purpleColour}"$(echo "$check_ip_address" | jq -r '.name')"${endColour}"
+    else
+      echo -e "\n${redColour}[!]${endColour} ${grayColour}La dirección IP proporcionada no existe${endColour}"
+    fi
   fi
   tput cnorm
 }
@@ -135,24 +141,30 @@ function get_machines_difficulty(){
 }
 
 function get_technique(){
-  technique="$1"
-  check_technique="$(curl -s "$API_URL" | jq -r --arg searched_technique "$technique" '.newData[] | select(.techniques | test("\\b\($searched_technique)\\b"; "i"))')"
-
-  if [ -n "$check_technique" ]; then
-    echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Mostrando las máquinas donde se ve la técnica${endColour} ${blueColour}$technique${endColour}${grayColour}:${endColour}\n"
-    echo "$check_technique" | jq -r '.name' | sort | column
+  if [ "$1" == "-l" ]; then
+    echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Listando todas las técnicas disponibles:${endColour}\n"
+    curl -s "$API_URL" | jq -r '.newData[].techniques | split("\n")[] | select(length > 0)' | sort -u | column
+    echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Total de técnicas únicas:${endColour} ${greenColour}$(curl -s "$API_URL" | jq -r '.newData[].techniques | split("\n")[] | select(length > 0)' | sort -u | wc -l)${endColour}"
   else
-    echo -e "\n${redColour}[!]${endColour} ${grayColour}No se ha encontrado ninguna máquina con la técnica indicada${endColour}"
+    technique="$1"
+    check_technique="$(curl -s "$API_URL" | jq -r --arg searched_technique "$technique" '.newData[] | select(.techniques | split("\n") | map(. | ascii_downcase) | contains([$searched_technique | ascii_downcase]))')"
+    if [ -n "$check_technique" ]; then
+      echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Mostrando las máquinas donde se ve la técnica${endColour} ${blueColour}$technique${endColour}${grayColour}:${endColour}\n"
+      echo "$check_technique" | jq -r '.name' | sort | column
+    else
+      echo -e "\n${redColour}[!]${endColour} ${grayColour}No se ha encontrado ninguna máquina con la técnica indicada${endColour}"
+    fi
   fi
   tput cnorm
 }
 
 function get_certification(){
   certification="$1"
-  check_certification="$(curl -s "$API_URL" | jq -r --arg searched_certification "$certification" '.newData[] | select(.certification | test("\\b\($searched_certification)\\b"; "i")) | .name')"
+  escaped_certification=$(printf '%s' "$certification" | sed 's/[^^]/[&]/g; s/\^/\\^/g')
+  check_certification="$(curl -s "$API_URL" | jq -r --arg searched_certification "$escaped_certification" '.newData[] | select(.certification | test("\($searched_certification)"; "i")) | .name')"
 
   if [ -n "$check_certification" ]; then
-    echo -e "\n${yellowColour}[+]${endColour} ${grayColour}A continuación se presentan las máquinas que te preparan para la certificación${endColour} ${blueColour}$cert${endColour}${grayColour}:${endColour}\n"
+    echo -e "\n${yellowColour}[+]${endColour} ${grayColour}A continuación se presentan las máquinas que te preparan para la certificación${endColour} ${blueColour}$certification${endColour}${grayColour}:${endColour}\n"
     echo "$check_certification" | sort | column
   else
     echo -e "\n${redColour}[!]${endColour} ${grayColour}No se ha encontrado ninguna máquina para la certificación indicada${endColour}"
@@ -209,10 +221,24 @@ tput civis; banner; while getopts ":am:i:o:d:t:c:y:p:h" opt; do
   case $opt in
     a) a_flag=1;;
     m) machine_name="$OPTARG"; m_flag=1;;
-    i) ip_address="$OPTARG"; i_flag=1;;
+    i) 
+      if [ "$OPTARG" == "-l" ]; then
+        i_flag=2
+      else
+        ip_address="$OPTARG"
+        i_flag=1
+      fi
+      ;;
     o) os="$OPTARG"; o_flag=1;;
     d) difficulty="$OPTARG"; d_flag=1;;
-    t) technique="$OPTARG"; t_flag=1;;
+    t)
+      if [ "$OPTARG" == "-l" ]; then
+        t_flag=2  # Usamos 2 para indicar que queremos listar todas las técnicas
+      else
+        technique="$OPTARG"
+        t_flag=1
+      fi
+      ;;
     c) certification="$OPTARG"; c_flag=1;;
     y) machine_name="$OPTARG"; y_flag=1;;
     p) platform="$OPTARG"; p_flag=1;;
@@ -273,7 +299,9 @@ if [ $a_flag -eq 1 ]; then
 elif [ $m_flag -eq 1 ]; then
   search_machine "$machine_name"
 elif [ $i_flag -eq 1 ]; then
-  search_ip $ip_address
+  search_ip "$ip_address"
+elif [ $i_flag -eq 2 ]; then
+  search_ip "-l"
 elif [ $o_flag -eq 1 ] && [ $d_flag -eq 1 ]; then
   get_difficulty_os "$difficulty" "$os"
 elif [ $o_flag -eq 1 ]; then
@@ -282,6 +310,8 @@ elif [ $d_flag -eq 1 ]; then
   get_machines_difficulty $difficulty
 elif [ $t_flag -eq 1 ]; then
   get_technique "$technique"
+elif [ $t_flag -eq 2 ]; then
+  get_technique "-l"
 elif [ $c_flag -eq 1 ]; then
   get_certification "$certification"
 elif [ $y_flag -eq 1 ]; then
