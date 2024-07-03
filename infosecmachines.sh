@@ -32,6 +32,7 @@ function help_panel(){
   echo -e "\t${purpleColour}p)${endColour} ${grayColour}Listar máquinas por plataforma${endColour}"
   echo -e "\n${yellowColour}[+]${endColour} Excel: ${blueColour}https://docs.google.com/spreadsheets/d/1dzvaGlT_0xnT-PGO27Z_4prHgA8PHIpErmoWdlUrSoA/edit#gid=0${endColour}"
   echo -e "${yellowColour}[+]${endColour} Web infosecmachines: ${blueColour}https://infosecmachines.io/${endColour}"
+  tput cnorm
 }
 
 function all_machines(){
@@ -45,8 +46,7 @@ function all_machines(){
 
 function search_machine(){
   machine_name="$1"
-  echo "MACHINE NAME: $machine_name"
-  check_machine_name="$(curl -s "$API_URL" | jq -r --arg searched_machine "$machine_name" '.newData[] | select(.name | test("(?i)\\b\($searched_machine)\\b"))')"
+  check_machine_name="$(curl -s "$API_URL" | jq -r --arg searched_machine "$machine_name" '.newData[] | select(.name | test("(?i)^\\b\($searched_machine)\\b$"))')"
 
   if [ -n "$check_machine_name" ]; then
 
@@ -78,8 +78,8 @@ function search_machine(){
 
     echo -e "${greenColour}${keys[4]}${endColour}:"; echo "$(echo "$check_machine_name" | jq -r '.techniques')" | while read skill; do echo -e "  ${purpleColour}-${endColour} $skill"; done
     echo -e "${greenColour}${keys[5]}${endColour}:"; echo "$(echo "$check_machine_name" | jq -r '.certification')" | while read cert; do echo -e "  ${purpleColour}-${endColour} $cert"; done
-    echo -e "${grayColour}${keys[6]}:${endColour} $(echo "$check_machine_name" | jq -r '.video')"
-    echo -e "${grayColour}${keys[7]}:${endColour} $(echo "$check_machine_name" | jq -r '.platform')"
+    echo -e "${greenColour}${keys[6]}${endColour}: $(echo "$check_machine_name" | jq -r '.video')"
+    echo -e "${greenColour}${keys[7]}${endColour}: $(echo "$check_machine_name" | jq -r '.platform')"
 
   else
     echo -e "\n${redColour}[!]${endColour} ${grayColour}La máquina proporcionada no existe${endColour}\n"
@@ -121,7 +121,7 @@ function get_machines_difficulty(){
     echo "$check_difficulty" | jq -r '.name' | sort | column
   else
     echo -e "\n${redColour}[!]${endColour} ${grayColour}La dificultad indicada no existe${endColour}\n"
-    echo -e "${grayColour}Selecciona una de las siguientes dificultades:${endColour}\n\n ${grayColour}-${endColour} ${greenColour}Easy${endColour}\n ${grayColour}-${endColour} ${yellowColour}Medium${endColour}\n ${grayColour}-${endColour} ${purpleColour}Hard${endColour}\n ${grayColour}-${endColour} ${redColour}Insane${endColour}"
+    echo -e "${grayColour}Ingresa una de las siguientes dificultades:${endColour}\n\n ${grayColour}-${endColour} ${greenColour}Easy${endColour}\n ${grayColour}-${endColour} ${yellowColour}Medium${endColour}\n ${grayColour}-${endColour} ${purpleColour}Hard${endColour}\n ${grayColour}-${endColour} ${redColour}Insane${endColour}"
   fi
   tput cnorm
 }
@@ -215,9 +215,27 @@ tput civis; while getopts ":uam:i:o:d:t:c:y:p:h" opt; do
     \?) echo -e "\n${redColour}[!]${endColour} Opción inválida: ${blueColour}-$OPTARG${endColour}" >&2
       help_panel
       exit 1;;
-    :) echo -e "\n${redColour}[!]${endColour} La opción ${blueColour}-$OPTARG${endColour} requiere un argumento" >&2
-      exit 1;;
+    :)
+      tput cnorm
+      case $OPTARG in
+        m)
+          echo -e "\n${redColour}[!]${endColour} Ingresa el nombre de una máquina"
+          echo -e "\n${yellowColour}[+]${endColour} Uso: ./infosecmachines.sh -m ${blueColour}<maquina>${endColour}"
+          exit 1;;
+        i)
+          echo -e "\n${redColour}[!]${endColour} Ingresa una dirección IP"
+          echo -e "\n${yellowColour}[+]${endColour} Uso: ./infosecmachines.sh -i ${blueColour}<dirección-ip>${endColour}"
+          exit 1;;
+        o)
+          echo -e "\n${redColour}[!]${endColour} Ingresa el sistema operativo: ${purpleColour}Linux${endColour} | ${purpleColour}Windows${endColour}"
+          echo -e "\n${yellowColour}[+]${endColour} Uso: ./infosecmachines.sh -i ${blueColour}<sistema-operativo>${endColour}"
+          exit 1;;
+        d)
+          echo -e "\n${redColour}[!]${endColour} Ingresa la dificultad: ${purpleColour}Easy${endColour} | ${purpleColour}Medium${endColour} | ${purpleColour}Hard${endColour} | ${purpleColour}Insane${endColour}"
+          echo -e "\n${yellowColour}[+]${endColour} Uso: ./infosecmachines.sh -i ${blueColour}<dificultad>${endColour}"
+          exit 1;;
 
+      esac
   esac
 done
 
@@ -225,7 +243,11 @@ done
 if [ $parameter_counter -eq 1 ]; then
   all_machines
 elif [ $parameter_counter -eq 2 ]; then
-  search_machine "$machine_name"
+  if [ -z "$OPTARG" ]; then
+    echo "ERROR"
+  else
+    search_machine "$machine_name"
+  fi
 elif [ $parameter_counter -eq 3 ]; then
   search_ip $ip_address
 elif [ $parameter_counter -eq 4 ]; then
