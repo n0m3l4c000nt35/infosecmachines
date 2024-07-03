@@ -19,6 +19,31 @@ function ctrl_c(){
 
 trap ctrl_c INT
 
+function check_jq() {
+  if ! command -v jq &> /dev/null; then
+    echo -e "\n${redColour}[!]${endColour} La herramienta ${greenColour}jq${endColour} no está instalada. Instalando..."
+    if [ -x "$(command -v apt)" ]; then
+      sudo apt update && sudo apt install -y jq
+    elif [ -x "$(command -v apt-get)" ]; then
+      sudo apt-get update && sudo apt-get install -y jq
+    elif [ -x "$(command -v yum)" ]; then
+      sudo yum install -y jq
+    elif [ -x "$(command -v dnf)" ]; then
+      sudo dnf install -y jq
+    elif [ -x "$(command -v pacman)" ]; then
+      sudo pacman -S --noconfirm jq
+    elif [ -x "$(command -v zypper)" ]; then
+      sudo zypper install -y jq
+    else
+      echo -e "\n${redColour}[!]${endColour} No se pudo instalar ${greenColour}jq${endColour} automáticamente. Por favor, instálalo manualmente."
+      exit 1
+    fi
+    echo -e "\n${greenColour}[✓]${endColour} ${greenColour}jq${endColour} se ha instalado exitosamente."
+  fi
+}
+
+check_jq
+
 function banner(){
   echo -e "${redColour}
  _       ___                                       _    _
