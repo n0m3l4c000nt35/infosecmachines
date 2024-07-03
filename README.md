@@ -1,10 +1,42 @@
+# infosecmachines
+
+<img title="Panel de ayuda" alt="Panel de ayuda" src="/images/infosecmachines.png">
+
+---
+
+<img title="Listar todas las máquinas" alt="Todas las máquinas" src="/images/all_machines.png">
+
+---
+
+<img title="Propiedades de una máquina" alt="Propiedades de una máquina" src="/images/machine.png">
+
+---
+
+<img title="Listar máquinas por plataforma" alt="Listar máquinas por plataforma" src="/images/platform.png">
+
+---
+
+<img title="Listar máquinas por certificación" alt="Listar máquinas por certificación" src="/images/certification.png">
+
+---
+
+<img title="Listar todas las técnicas" alt="Listar todas las técnicas" src="/images/list_techniques.png">
+
+---
+
+## Descarga
+
 ```shell
 wget https://raw.githubusercontent.com/n0m3l4c000nt35/infosecmachines/main/infosecmachines.sh
 ```
 
+## Permisos
+
 ```shell
 chmod +x infosecmachines.sh
 ```
+
+## Por si arroja algún error en la primera ejecución
 
 ```shell
  dos2unix infosecmachines.sh
