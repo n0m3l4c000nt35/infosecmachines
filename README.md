@@ -10,26 +10,29 @@
 - Obtener link de la resolución de la máquina en YouTube.
 - Listar máquinas por plataforma.
 
+---
+
+### Panel de ayuda
 <img title="Panel de ayuda" alt="Panel de ayuda" src="/images/infosecmachines.png">
 
 ---
-
+### Listar todas las máquinas
 <img title="Listar todas las máquinas" alt="Todas las máquinas" src="/images/all_machines.png">
 
 ---
-
+### Mostrar las propiedades de la máquina buscada
 <img title="Propiedades de una máquina" alt="Propiedades de una máquina" src="/images/machine.png">
 
 ---
-
+### Listar máquinas por plataforma
 <img title="Listar máquinas por plataforma" alt="Listar máquinas por plataforma" src="/images/platform.png">
 
 ---
-
+### Listar máquinas por certificación
 <img title="Listar máquinas por certificación" alt="Listar máquinas por certificación" src="/images/certification.png">
 
 ---
-
+### Listar todas las técnicas
 <img title="Listar todas las técnicas" alt="Listar todas las técnicas" src="/images/list_techniques.png">
 
 ---
