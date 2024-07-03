@@ -19,17 +19,25 @@ function ctrl_c(){
 
 trap ctrl_c INT
 
+function banner(){
+  echo -e "${redColour}
+ _       ___                                       _    _
+|_| ___ |  _| ___  ___  ___  ___  _____  ___  ___ | |_ |_| ___  ___  ___ 
+| ||   ||  _|| . ||_ -|| -_||  _||     || .'||  _||   || ||   || -_||_ -|
+|_||_|_||_|  |___||___||___||___||_|_|_||__,||___||_|_||_||_|_||___||___|${endColour}"
+}
+
 function help_panel(){
   echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Uso:${endColour}"
-  echo -e "\t${purpleColour}a)${endColour} ${grayColour}Listar todas las máquinas${endColour}"
-  echo -e "\t${purpleColour}m)${endColour} ${grayColour}Buscar por nombre de máquina${endColour}"
-  echo -e "\t${purpleColour}i)${endColour} ${grayColour}Buscar por dirección IP${endColour}"
-  echo -e "\t${purpleColour}o)${endColour} ${grayColour}Buscar por el sistema operativo${endColour}"
-  echo -e "\t${purpleColour}d)${endColour} ${grayColour}Buscar por la dificultad de una máquina${endColour}"
-  echo -e "\t${purpleColour}t)${endColour} ${grayColour}Buscar por técnica${endColour}"
-  echo -e "\t${purpleColour}c)${endColour} ${grayColour}Buscar por certificación${endColour}"
-  echo -e "\t${purpleColour}y)${endColour} ${grayColour}Obtener link de la resolución de la máquina en YouTube${endColour}"
-  echo -e "\t${purpleColour}p)${endColour} ${grayColour}Listar máquinas por plataforma${endColour}"
+  echo -e "\t${purpleColour}a${endColour}${turquoiseColour})${endColour} ${grayColour}Listar todas las máquinas${endColour}"
+  echo -e "\t${purpleColour}m${endColour}${turquoiseColour})${endColour} ${grayColour}Buscar por nombre de máquina${endColour}"
+  echo -e "\t${purpleColour}i${endColour}${turquoiseColour})${endColour} ${grayColour}Buscar por dirección IP${endColour}"
+  echo -e "\t${purpleColour}o${endColour}${turquoiseColour})${endColour} ${grayColour}Buscar por el sistema operativo${endColour}"
+  echo -e "\t${purpleColour}d${endColour}${turquoiseColour})${endColour} ${grayColour}Buscar por la dificultad de una máquina${endColour}"
+  echo -e "\t${purpleColour}t${endColour}${turquoiseColour})${endColour} ${grayColour}Buscar por técnica${endColour}"
+  echo -e "\t${purpleColour}c${endColour}${turquoiseColour})${endColour} ${grayColour}Buscar por certificación${endColour}"
+  echo -e "\t${purpleColour}y${endColour}${turquoiseColour})${endColour} ${grayColour}Obtener link de la resolución de la máquina en YouTube${endColour}"
+  echo -e "\t${purpleColour}p${endColour}${turquoiseColour})${endColour} ${grayColour}Listar máquinas por plataforma${endColour}"
   echo -e "\n${yellowColour}[+]${endColour} Excel: ${blueColour}https://docs.google.com/spreadsheets/d/1dzvaGlT_0xnT-PGO27Z_4prHgA8PHIpErmoWdlUrSoA/edit#gid=0${endColour}"
   echo -e "${yellowColour}[+]${endColour} Web infosecmachines: ${blueColour}https://infosecmachines.io/${endColour}"
   tput cnorm
@@ -165,22 +173,6 @@ function get_youtube_link(){
   tput cnorm
 }
 
-function get_difficulty_os(){
-  difficulty="$1"
-  os="$2"
-
-  check_difficulty="$(curl -s "$API_URL" | jq -r --arg searched_difficulty "$difficulty" '.newData[] | select(.state | test("\\b\($searched_difficulty)\\b"; "i")) | .state')"
-  check_os="$(curl -s "$API_URL" | jq -r --arg searched_os "$os" '.newData[] | select(.os | test("\\b\($searched_os)\\b"; "i")) | .os')"
-
-  if [ -n "$check_difficulty" ] && [ -n "$check_os" ]; then
-    echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Listando máquinas de dificultad${endColour} ${blueColour}$difficulty${endColour} ${grayColour}que tengan el sistema operativo${endColour} ${blueColour}$os${endColour}${grayColour}:${endColour}\n"
-    echo -e "$(curl -s "$API_URL" | jq -r --arg searched_difficulty "$difficulty" --arg searched_os "$os" '.newData[] | select(.state | test("\\b\($searched_difficulty)\\b"; "i")) | select(.os | test("\\b\($searched_os)\\b"; "i")) | .name' | sort | column)"
-  else
-    echo -e "\n${redColour}[!]${endColour} ${grayColour}Se ha indicado una dificultad o sistema operativo incorrectos${endColour}"
-  fi
-  tput cnorm
-}
-
 function get_machines_by_platform(){
   platform="$1"
 
@@ -196,21 +188,34 @@ function get_machines_by_platform(){
   tput cnorm
 }
 
-declare -i parameter_counter=0
-declare -i difficulty_wd=0
-declare -i os_wd=0
+function get_difficulty_os(){
+  difficulty="$1"
+  os="$2"
+  
+  check_machines="$(curl -s "$API_URL" | jq -r --arg searched_difficulty "$difficulty" --arg searched_os "$os" '.newData[] | select(.state | test("\\b\($searched_difficulty)\\b"; "i")) | select(.os | test("\\b\($searched_os)\\b"; "i")) | .name')"
 
-tput civis; while getopts ":uam:i:o:d:t:c:y:p:h" opt; do
+  if [ -n "$check_machines" ]; then
+    echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Listando máquinas de dificultad${endColour} ${blueColour}$difficulty${endColour} ${grayColour}que tengan el sistema operativo${endColour} ${blueColour}$os${endColour}${grayColour}:${endColour}\n"
+    echo "$check_machines" | sort | column
+  else
+    echo -e "\n${redColour}[!]${endColour} ${grayColour}No se encontraron máquinas con la dificultad${endColour} ${blueColour}$difficulty${endColour} ${grayColour}y el sistema operativo${endColour} ${blueColour}$os${endColour}"
+  fi
+  tput cnorm
+}
+
+declare -i a_flag=0 m_flag=0 i_flag=0 o_flag=0 d_flag=0 t_flag=0 c_flag=0 y_flag=0 p_flag=0
+
+tput civis; banner; while getopts ":am:i:o:d:t:c:y:p:h" opt; do
   case $opt in
-    a) let parameter_counter+=1;;
-    m) machine_name="$OPTARG"; let parameter_counter+=2;;
-    i) ip_address="$OPTARG"; let parameter_counter+=3;;
-    o) os="$OPTARG"; os_wd=1; let parameter_counter+=4;;
-    d) difficulty="$OPTARG"; difficulty_wd=1; let parameter_counter+=5;;
-    t) technique="$OPTARG"; let parameter_counter+=6;;
-    c) certification="$OPTARG"; let parameter_counter+=7;;
-    y) machine_name="$OPTARG"; let parameter_counter+=8;;
-    p) platform="$OPTARG"; let parameter_counter+=9;;
+    a) a_flag=1;;
+    m) machine_name="$OPTARG"; m_flag=1;;
+    i) ip_address="$OPTARG"; i_flag=1;;
+    o) os="$OPTARG"; o_flag=1;;
+    d) difficulty="$OPTARG"; d_flag=1;;
+    t) technique="$OPTARG"; t_flag=1;;
+    c) certification="$OPTARG"; c_flag=1;;
+    y) machine_name="$OPTARG"; y_flag=1;;
+    p) platform="$OPTARG"; p_flag=1;;
     h) ;;
     \?) echo -e "\n${redColour}[!]${endColour} Opción inválida: ${blueColour}-$OPTARG${endColour}" >&2
       help_panel
@@ -219,51 +224,70 @@ tput civis; while getopts ":uam:i:o:d:t:c:y:p:h" opt; do
       tput cnorm
       case $OPTARG in
         m)
-          echo -e "\n${redColour}[!]${endColour} Ingresa el nombre de una máquina"
+          echo -e "\n${redColour}[!]${endColour} Ingresa el nombre de la máquina"
           echo -e "\n${yellowColour}[+]${endColour} Uso: ./infosecmachines.sh -m ${blueColour}<maquina>${endColour}"
+          echo -e "\nIngresa el nombre de la máquina entre comillas si involucra más de una palabra"
+          echo -e "\n${yellowColour}[+]${endColour} Uso: ./infosecmachines.sh -m ${blueColour}\"<máquina> <buscada>\"${endColour}"
           exit 1;;
         i)
-          echo -e "\n${redColour}[!]${endColour} Ingresa una dirección IP"
+          echo -e "\n${redColour}[!]${endColour} Ingresa la dirección IP"
           echo -e "\n${yellowColour}[+]${endColour} Uso: ./infosecmachines.sh -i ${blueColour}<dirección-ip>${endColour}"
           exit 1;;
         o)
           echo -e "\n${redColour}[!]${endColour} Ingresa el sistema operativo: ${purpleColour}Linux${endColour} | ${purpleColour}Windows${endColour}"
-          echo -e "\n${yellowColour}[+]${endColour} Uso: ./infosecmachines.sh -i ${blueColour}<sistema-operativo>${endColour}"
+          echo -e "\n${yellowColour}[+]${endColour} Uso: ./infosecmachines.sh -o ${blueColour}<sistema-operativo>${endColour}"
           exit 1;;
         d)
           echo -e "\n${redColour}[!]${endColour} Ingresa la dificultad: ${purpleColour}Easy${endColour} | ${purpleColour}Medium${endColour} | ${purpleColour}Hard${endColour} | ${purpleColour}Insane${endColour}"
-          echo -e "\n${yellowColour}[+]${endColour} Uso: ./infosecmachines.sh -i ${blueColour}<dificultad>${endColour}"
+          echo -e "\n${yellowColour}[+]${endColour} Uso: ./infosecmachines.sh -d ${blueColour}<dificultad>${endColour}"
           exit 1;;
-
+        t)
+          echo -e "\n${redColour}[!]${endColour} Ingresa la técnica"
+          echo -e "\n${yellowColour}[+]${endColour} Uso: ./infosecmachines.sh -t ${blueColour}<técnica>${endColour}"
+          echo -e "\nIngresa la técnica entre comillas si involucra más de una palabra"
+          echo -e "\n${yellowColour}[+]${endColour} Uso: ./infosecmachines.sh -t ${blueColour}\"<técnica> <buscada>\"${endColour}"
+          exit 1;;
+        c)
+          echo -e "\n${redColour}[!]${endColour} Ingresa la certificación:\n"
+          echo "$(curl -s "https://infosecmachines.io/api/machines" | jq -r .newData.[].certification | sort -u)" | while read tech; do echo -e "${purpleColour}-${endColour} $tech"; done
+          echo -e "\n${yellowColour}[+]${endColour} Uso: ./infosecmachines.sh -c ${blueColour}<certificación>${endColour}"
+          echo -e "\nIngresa la certificación entre comillas si involucra más de una palabra"
+          echo -e "\n${yellowColour}[+]${endColour} Uso: ./infosecmachines.sh -c ${blueColour}\"<certificación> <buscada>\"${endColour}"
+          exit 1;;
+        y)
+          echo -e "\n${redColour}[!]${endColour} Ingresa el nombre de la máquina"
+          echo -e "\n${yellowColour}[+]${endColour} Uso: ./infosecmachines.sh -y ${blueColour}<maquina>${endColour}"
+          echo -e "\nIngresa el nombre de la máquina entre comillas si involucra más de una palabra"
+          echo -e "\n${yellowColour}[+]${endColour} Uso: ./infosecmachines.sh -y ${blueColour}\"<máquina> <buscada>\"${endColour}"
+          exit 1;;
+        p)
+          echo -e "\n${redColour}[!]${endColour} Ingresa la plataforma: ${purpleColour}HackTheBox${endColour} | ${purpleColour}VulnHub${endColour} | ${purpleColour}PortSwigger${endColour}"
+          echo -e "\n${yellowColour}[+]${endColour} Uso: ./infosecmachines.sh -p ${blueColour}<plataforma>${endColour}"
+          exit 1;;
       esac
   esac
 done
 
-
-if [ $parameter_counter -eq 1 ]; then
+if [ $a_flag -eq 1 ]; then
   all_machines
-elif [ $parameter_counter -eq 2 ]; then
-  if [ -z "$OPTARG" ]; then
-    echo "ERROR"
-  else
-    search_machine "$machine_name"
-  fi
-elif [ $parameter_counter -eq 3 ]; then
+elif [ $m_flag -eq 1 ]; then
+  search_machine "$machine_name"
+elif [ $i_flag -eq 1 ]; then
   search_ip $ip_address
-elif [ $parameter_counter -eq 4 ]; then
+elif [ $o_flag -eq 1 ] && [ $d_flag -eq 1 ]; then
+  get_difficulty_os "$difficulty" "$os"
+elif [ $o_flag -eq 1 ]; then
   get_os_machines $os
-elif [ $parameter_counter -eq 5 ]; then
+elif [ $d_flag -eq 1 ]; then
   get_machines_difficulty $difficulty
-elif [ $parameter_counter -eq 6 ]; then
+elif [ $t_flag -eq 1 ]; then
   get_technique "$technique"
-elif [ $parameter_counter -eq 7 ]; then
+elif [ $c_flag -eq 1 ]; then
   get_certification "$certification"
-elif [ $parameter_counter -eq 8 ]; then
+elif [ $y_flag -eq 1 ]; then
   get_youtube_link "$machine_name"
-elif [ $parameter_counter -eq 9 ]; then
-  get_machines_by_platform "$platform"
-elif [ $difficulty_wd -eq 1 ] && [ $os_wd -eq 1 ]; then
-  get_difficulty_os $difficulty $os
+elif [ $p_flag -eq 1 ]; then
+  get_machines_by_platform $platform
 else
   help_panel
 fi
