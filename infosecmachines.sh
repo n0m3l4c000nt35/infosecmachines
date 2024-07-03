@@ -251,13 +251,13 @@ tput civis; banner; while getopts ":am:i:o:d:t:c:y:p:h" opt; do
       case $OPTARG in
         m)
           echo -e "\n${redColour}[!]${endColour} Ingresa el nombre de la máquina"
-          echo -e "\n${yellowColour}[+]${endColour} Uso: ./infosecmachines.sh -m ${blueColour}<maquina>${endColour}"
-          echo -e "\nIngresa el nombre de la máquina entre comillas si involucra más de una palabra"
-          echo -e "\n${yellowColour}[+]${endColour} Uso: ./infosecmachines.sh -m ${blueColour}\"<máquina> <buscada>\"${endColour}"
+          echo -e "\n${yellowColour}[+]${endColour} Uso:\n\t./infosecmachines.sh -m ${blueColour}<maquina>${endColour}"
+          echo -e "\t./infosecmachines.sh -m ${blueColour}\"<máquina> <buscada>\"${endColour}\tIngresa el nombre de la máquina entre comillas si involucra más de una palabra"
           exit 1;;
         i)
           echo -e "\n${redColour}[!]${endColour} Ingresa la dirección IP"
-          echo -e "\n${yellowColour}[+]${endColour} Uso: ./infosecmachines.sh -i ${blueColour}<dirección-ip>${endColour}"
+          echo -e "\n${yellowColour}[+]${endColour} Uso:\n\t./infosecmachines.sh -i ${blueColour}<dirección-ip>${endColour}"
+          echo -e "\t./infosecmachines.sh -i -l\tLista todas las direcciones IP"
           exit 1;;
         o)
           echo -e "\n${redColour}[!]${endColour} Ingresa el sistema operativo: ${purpleColour}Linux${endColour} | ${purpleColour}Windows${endColour}"
@@ -269,22 +269,19 @@ tput civis; banner; while getopts ":am:i:o:d:t:c:y:p:h" opt; do
           exit 1;;
         t)
           echo -e "\n${redColour}[!]${endColour} Ingresa la técnica"
-          echo -e "\n${yellowColour}[+]${endColour} Uso: ./infosecmachines.sh -t ${blueColour}<técnica>${endColour}"
-          echo -e "\nIngresa la técnica entre comillas si involucra más de una palabra"
-          echo -e "\n${yellowColour}[+]${endColour} Uso: ./infosecmachines.sh -t ${blueColour}\"<técnica> <buscada>\"${endColour}"
+          echo -e "\n${yellowColour}[+]${endColour} Uso:\n\t./infosecmachines.sh -t ${blueColour}<técnica>${endColour}"
+          echo -e "\t./infosecmachines.sh -t ${blueColour}\"<técnica> <buscada>\"${endColour}\tIngresa la técnica entre comillas si involucra más de una palabra"
           exit 1;;
         c)
           echo -e "\n${redColour}[!]${endColour} Ingresa la certificación:\n"
           echo "$(curl -s "https://infosecmachines.io/api/machines" | jq -r .newData.[].certification | sort -u)" | while read tech; do echo -e "${purpleColour}-${endColour} $tech"; done
-          echo -e "\n${yellowColour}[+]${endColour} Uso: ./infosecmachines.sh -c ${blueColour}<certificación>${endColour}"
-          echo -e "\nIngresa la certificación entre comillas si involucra más de una palabra"
-          echo -e "\n${yellowColour}[+]${endColour} Uso: ./infosecmachines.sh -c ${blueColour}\"<certificación> <buscada>\"${endColour}"
+          echo -e "\n${yellowColour}[+]${endColour} Uso:\n\t./infosecmachines.sh -c ${blueColour}<certificación>${endColour}"
+          echo -e "\t./infosecmachines.sh -c ${blueColour}\"<certificación> <buscada>\"${endColour}\tIngresa la certificación entre comillas si involucra más de una palabra"
           exit 1;;
         y)
           echo -e "\n${redColour}[!]${endColour} Ingresa el nombre de la máquina"
-          echo -e "\n${yellowColour}[+]${endColour} Uso: ./infosecmachines.sh -y ${blueColour}<maquina>${endColour}"
-          echo -e "\nIngresa el nombre de la máquina entre comillas si involucra más de una palabra"
-          echo -e "\n${yellowColour}[+]${endColour} Uso: ./infosecmachines.sh -y ${blueColour}\"<máquina> <buscada>\"${endColour}"
+          echo -e "\n${yellowColour}[+]${endColour} Uso:\n\t./infosecmachines.sh -y ${blueColour}<maquina>${endColour}"
+          echo -e "\t./infosecmachines.sh -y ${blueColour}\"<máquina> <buscada>\"${endColour}\tIngresa el nombre de la máquina entre comillas si involucra más de una palabra"
           exit 1;;
         p)
           echo -e "\n${redColour}[!]${endColour} Ingresa la plataforma: ${purpleColour}HackTheBox${endColour} | ${purpleColour}VulnHub${endColour} | ${purpleColour}PortSwigger${endColour}"
