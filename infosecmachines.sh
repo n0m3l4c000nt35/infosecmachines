@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+nombre_script=$0
+dos2unix $nombre_script &>/dev/null 
+
 # Colours
 greenColour="\e[0;32m\033[1m"
 endColour="\033[0m\e[0m"
