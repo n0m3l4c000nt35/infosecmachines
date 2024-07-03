@@ -1,5 +1,15 @@
 # infosecmachines
 
+- Listar todas las máquinas.
+- Buscar por nombre de la máquina.
+- Buscar por dirección IP.
+- Buscar por el sistema operativo.
+- Buscar por la dificultad de la máquina.
+- Buscar por técnica.
+- Buscar por certificación.
+- Obtener link de la resolución de la máquina en YouTube.
+- Listar máquinas por plataforma.
+
 <img title="Panel de ayuda" alt="Panel de ayuda" src="/images/infosecmachines.png">
 
 ---
