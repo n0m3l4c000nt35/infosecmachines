@@ -17,7 +17,7 @@
 
 ---
 ### Listar todas las máquinas
-<img title="Listar todas las máquinas" alt="Todas las máquinas" src="/images/all_machines.png">
+<img title="Listar todas las máquinas" alt="Todas las máquinas" src="/images/listar_todas_las_maquinas.png">
 
 ---
 ### Mostrar las propiedades de la máquina buscada
