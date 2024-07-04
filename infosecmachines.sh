@@ -72,7 +72,7 @@ function help_panel(){
 }
 
 function get_version(){
-  echo -e "\n${yellowColour}[+]${endColour} v1.0"
+  echo -e "\n${yellowColour}[+]${endColour} v1.0.0"
 }
 
 function all_machines(){
