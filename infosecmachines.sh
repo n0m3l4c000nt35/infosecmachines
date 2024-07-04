@@ -65,9 +65,14 @@ function help_panel(){
   echo -e "\t${purpleColour}c${endColour}${turquoiseColour})${endColour} ${grayColour}Buscar por certificación${endColour}"
   echo -e "\t${purpleColour}y${endColour}${turquoiseColour})${endColour} ${grayColour}Obtener link de la resolución de la máquina en YouTube${endColour}"
   echo -e "\t${purpleColour}p${endColour}${turquoiseColour})${endColour} ${grayColour}Listar máquinas por plataforma${endColour}: ${purpleColour}HackTheBox${endColour} | ${purpleColour}VulnHub${endColour} | ${purpleColour}PortSwigger${endColour}"
+  echo -e "\t${purpleColour}v${endColour}${turquoiseColour})${endColour} ${grayColour}Versión"
   echo -e "\n${yellowColour}[+]${endColour} Excel: ${blueColour}https://docs.google.com/spreadsheets/d/1dzvaGlT_0xnT-PGO27Z_4prHgA8PHIpErmoWdlUrSoA/edit#gid=0${endColour}"
   echo -e "${yellowColour}[+]${endColour} Web infosecmachines: ${blueColour}https://infosecmachines.io/${endColour}"
   tput cnorm
+}
+
+function get_version(){
+  echo -e "\n${yellowColour}[+]${endColour} v1.0"
 }
 
 function all_machines(){
@@ -249,9 +254,9 @@ function get_difficulty_os(){
   tput cnorm
 }
 
-declare -i a_flag=0 m_flag=0 i_flag=0 o_flag=0 d_flag=0 t_flag=0 c_flag=0 y_flag=0 p_flag=0
+declare -i a_flag=0 m_flag=0 i_flag=0 o_flag=0 d_flag=0 t_flag=0 c_flag=0 y_flag=0 p_flag=0 v_flag=0
 
-tput civis; banner; while getopts ":am:i:o:d:t:c:y:p:h" opt; do
+tput civis; banner; while getopts ":am:i:o:d:t:c:y:p:vh" opt; do
   case $opt in
     a) a_flag=1;;
     m) machine_name="$OPTARG"; m_flag=1;;
@@ -276,6 +281,7 @@ tput civis; banner; while getopts ":am:i:o:d:t:c:y:p:h" opt; do
     c) certification="$OPTARG"; c_flag=1;;
     y) machine_name="$OPTARG"; y_flag=1;;
     p) platform="$OPTARG"; p_flag=1;;
+    v) v_flag=1;;
     h) ;;
     \?) echo -e "\n${redColour}[!]${endColour} Opción inválida: ${blueColour}-$OPTARG${endColour}" >&2
       help_panel
@@ -349,6 +355,8 @@ elif [ $y_flag -eq 1 ]; then
   get_youtube_link "$machine_name"
 elif [ $p_flag -eq 1 ]; then
   get_machines_by_platform $platform
+elif [ $v_flag -eq 1 ]; then
+  get_version
 else
   help_panel
 fi
