@@ -147,6 +147,7 @@ function get_os_machines(){
   if [ -n "$check_os" ]; then
     echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Mostrando las máquinas cuyo sistema operativo es${endColour} ${blueColour}$os${endColour}${grayColour}:${endColour}\n"
     echo "$check_os" | sort | column
+    echo -e "\n${yellowColour}[+]${endColour} Total de máquinas: ${greenColour}$(echo "$check_os" | wc -l)${endColour}"
   else
     echo -e "\n${redColour}[!]${endColour} ${grayColour}El sistema operativo indicado no existe${endColour}"
   fi
