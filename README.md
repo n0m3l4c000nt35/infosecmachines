@@ -21,7 +21,7 @@
 
 ---
 ### Mostrar las propiedades de la máquina buscada
-<img title="Propiedades de una máquina" alt="Propiedades de una máquina" src="/images/machine.png">
+<img title="Propiedades de una máquina" alt="Propiedades de una máquina" src="/images/maquina_buscada.png">
 
 ---
 ### Listar máquinas por plataforma
