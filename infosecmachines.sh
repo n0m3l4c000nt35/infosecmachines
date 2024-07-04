@@ -242,6 +242,7 @@ function get_difficulty_os(){
   if [ -n "$check_machines" ]; then
     echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Listando máquinas de dificultad${endColour} ${blueColour}$difficulty${endColour} ${grayColour}que tengan el sistema operativo${endColour} ${blueColour}$os${endColour}${grayColour}:${endColour}\n"
     echo "$check_machines" | sort | column
+    echo -e "\n${yellowColour}[+]${endColour} Total de máquinas: ${greenColour}$(echo "$check_machines" | wc -l)${endColour}"
   else
     echo -e "\n${redColour}[!]${endColour} ${grayColour}No se encontraron máquinas con la dificultad${endColour} ${blueColour}$difficulty${endColour} ${grayColour}y el sistema operativo${endColour} ${blueColour}$os${endColour}"
   fi
