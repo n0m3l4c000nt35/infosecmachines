@@ -160,6 +160,7 @@ function get_machines_difficulty(){
   if [ -n "$check_difficulty" ]; then
     echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Mostrando las máquinas que poseen un nivel de dificultad${endColour} ${blueColour}$difficulty${endColour}${grayColour}:${endColour}\n"
     echo "$check_difficulty" | jq -r '.name' | sort | column
+    echo -e "\n${yellowColour}[+]${endColour} Total de máquinas: ${greenColour}$(echo "$check_difficulty" | jq -r '.name' | wc -l)${endColour}"
   else
     echo -e "\n${redColour}[!]${endColour} ${grayColour}La dificultad indicada no existe${endColour}\n"
     echo -e "${grayColour}Ingresa una de las siguientes dificultades:${endColour}\n\n ${grayColour}-${endColour} ${greenColour}Easy${endColour}\n ${grayColour}-${endColour} ${yellowColour}Medium${endColour}\n ${grayColour}-${endColour} ${purpleColour}Hard${endColour}\n ${grayColour}-${endColour} ${redColour}Insane${endColour}"
