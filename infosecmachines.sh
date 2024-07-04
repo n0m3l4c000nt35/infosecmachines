@@ -73,7 +73,7 @@ function help_panel(){
 function all_machines(){
   echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Listando todas las máquinas:${endColour}\n"
   machines=$(curl -s "$API_URL" | jq -r '.newData[].name' | sort)
-  echo "$machines" | column
+  echo "$machines" | column | less
   total_machines=$(echo "$machines" | wc -l)
   echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Total de máquinas:${endColour} ${greenColour}$total_machines${endColour}"
   tput cnorm
