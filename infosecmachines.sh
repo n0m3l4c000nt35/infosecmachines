@@ -178,6 +178,7 @@ function get_technique(){
     if [ -n "$check_technique" ]; then
       echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Mostrando las máquinas donde se ve la técnica${endColour} ${blueColour}$technique${endColour}${grayColour}:${endColour}\n"
       echo "$check_technique" | jq -r '.name' | sort | column
+      echo -e "\n${yellowColour}[+]${endColour} Total de máquinas: ${greenColour}$(echo "$check_technique" | jq -r '.name' | wc -l)${endColour}"
     else
       echo -e "\n${redColour}[!]${endColour} ${grayColour}No se ha encontrado ninguna máquina con la técnica indicada${endColour}"
     fi
