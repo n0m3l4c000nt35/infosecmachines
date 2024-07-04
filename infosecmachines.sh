@@ -303,7 +303,7 @@ tput civis; banner; while getopts ":am:i:o:d:t:c:y:p:h" opt; do
           exit 1;;
         c)
           echo -e "\n${redColour}[!]${endColour} Ingresa la certificación:\n"
-          echo "$(curl -s "https://infosecmachines.io/api/machines" | jq -r .newData.[].certification | sort -u)" | while read tech; do echo -e "${purpleColour}-${endColour} $tech"; done
+          echo "$(curl -s "https://infosecmachines.io/api/machines" | jq -r '.newData[].certification' | sort -u)" | while read tech; do echo -e "${purpleColour}-${endColour} $tech"; done
           echo -e "\n${yellowColour}[+]${endColour} Uso:\n\t./infosecmachines.sh -c ${blueColour}<certificación>${endColour}"
           echo -e "\t./infosecmachines.sh -c ${blueColour}\"<certificación> <buscada>\"${endColour}\tIngresa la certificación entre comillas si involucra más de una palabra"
           exit 1;;
