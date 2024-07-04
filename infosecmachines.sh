@@ -194,6 +194,7 @@ function get_certification(){
   if [ -n "$check_certification" ]; then
     echo -e "\n${yellowColour}[+]${endColour} ${grayColour}A continuación se presentan las máquinas que te preparan para la certificación${endColour} ${blueColour}$certification${endColour}${grayColour}:${endColour}\n"
     echo "$check_certification" | sort | column
+    echo -e "\n${yellowColour}[+]${endColour} Total de máquinas: ${greenColour}$(echo "$check_certification" | wc -l)${endColour}"
   else
     echo -e "\n${redColour}[!]${endColour} ${grayColour}No se ha encontrado ninguna máquina para la certificación indicada${endColour}"
   fi
