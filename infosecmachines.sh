@@ -81,7 +81,8 @@ function all_machines(){
 
 function search_machine(){
   machine_name="$1"
-  check_machine_name="$(curl -s "$API_URL" | jq -r --arg searched_machine "$machine_name" '.newData[] | select(.name | test("(?i)^\\b\($searched_machine)\\b$"))')"
+  escaped_name=$(printf '%s' "$machine_name" | sed 's/[^^]/[&]/g; s/\^/\\^/g')
+  check_machine_name="$(curl -s "$API_URL" | jq -r --arg searched_machine "$escaped_name" '.newData[] | select(.name | test("\($searched_machine)"; "i"))')"
 
   if [ -n "$check_machine_name" ]; then
 
