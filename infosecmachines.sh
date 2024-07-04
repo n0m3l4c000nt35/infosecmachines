@@ -224,6 +224,7 @@ function get_machines_by_platform(){
   if [ -n "$check_platform" ]; then
     echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Listando máquinas pertenecientes a la plataforma${endColour} ${blueColour}$platform${endColour}${grayColour}:${endColour}\n"
     echo "$check_platform" | jq -r '.name' | sort | column
+    echo -e "\n${yellowColour}[+]${endColour} Total de máquinas: ${greenColour}$(echo "$check_platform" | jq -r '.name' | wc -l)${endColour}"
   else
     echo -e "\n${redColour}[!]${endColour} ${grayColour}La plataforma indicada no existe${endColour}"
     echo -e "\n${grayColour}Selecciona una de las siguientes plataformas:${endColour}\n\n ${grayColour}-${endColour} ${greenColour}HackTheBox${endColour}\n ${grayColour}-${endColour} ${turquoiseColour}VulnHub${endColour}\n ${grayColour}-${endColour} ${yellowColour}PortSwigger${endColour}\n"
