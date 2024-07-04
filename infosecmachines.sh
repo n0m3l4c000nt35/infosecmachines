@@ -171,7 +171,7 @@ function get_technique(){
   if [ "$1" == "-l" ]; then
     echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Listando todas las técnicas disponibles:${endColour}\n"
     curl -s "$API_URL" | jq -r '.newData[].techniques | split("\n")[] | select(length > 0)' | sort -u | column
-    echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Total de técnicas únicas:${endColour} ${greenColour}$(curl -s "$API_URL" | jq -r '.newData[].techniques | split("\n")[] | select(length > 0)' | sort -u | wc -l)${endColour}"
+    echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Total de técnicas:${endColour} ${greenColour}$(curl -s "$API_URL" | jq -r '.newData[].techniques | split("\n")[] | select(length > 0)' | sort -u | wc -l)${endColour}"
   else
     technique="$1"
     check_technique="$(curl -s "$API_URL" | jq -r --arg searched_technique "$technique" '.newData[] | select(.techniques | split("\n") | map(. | ascii_downcase) | contains([$searched_technique | ascii_downcase]))')"
