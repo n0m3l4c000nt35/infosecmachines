@@ -269,7 +269,7 @@ function get_os_machines(){
     fi
   fi
 
-  check_os="$(echo "$api_response" | jq -r --arg searched_os "$os" '.newData[] | select((.os | ascii_downcase) == ($searched_os | ascii_downcase)) | .name')"
+  check_os="$(echo "$api_response" | jq -r --arg searched_os "$os" '.newData[] | select((.os | ascii_downcase) == ($searched_os | ascii_downcase)) | .name | gsub("\n"; " ")')"
 
   if [ -n "$check_os" ]; then
     echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Mostrando las máquinas cuyo sistema operativo es${endColour} ${blueColour}$os${endColour}${grayColour}:${endColour}\n"
@@ -385,7 +385,6 @@ function get_youtube_link(){
   api_response=$(call_api)
   if [ $? -ne 0 ]; then
     if is_cache_valid; then
-        echo -e "${yellowColour}[i] Usando datos en caché debido a un error en la API.${endColour}"
         api_response=$(read_cache)
     else
         echo -e "${redColour}[!] No se pudo obtener la lista de máquinas y no hay caché válido.${endColour}"
@@ -393,7 +392,7 @@ function get_youtube_link(){
     fi
   fi
 
-  check_machine_name="$(echo "$api_response" | jq -r --arg searched_machine "$machine_name" '.newData[] | select(.name | test("\\b\($searched_machine)\\b"; "i")) | .video')"
+  check_machine_name="$(echo "$api_response" | jq -r --arg searched_machine "$machine_name" '.newData[] | select((.name | ascii_downcase) == ($searched_machine | ascii_downcase)) | .video')"
 
   if [ -n "$check_machine_name" ]; then
     echo -e "\n${yellowColour}[+]${endColour} ${grayColour}El tutorial para la máquina${endColour} ${blueColour}$machine_name${endColour}${grayColour} está en el siguiente enlace:${endColour}\n"
@@ -411,7 +410,6 @@ function get_machines_by_platform(){
   api_response=$(call_api)
   if [ $? -ne 0 ]; then
     if is_cache_valid; then
-        echo -e "${yellowColour}[i] Usando datos en caché debido a un error en la API.${endColour}"
         api_response=$(read_cache)
     else
         echo -e "${redColour}[!] No se pudo obtener la lista de máquinas y no hay caché válido.${endColour}"
@@ -419,11 +417,11 @@ function get_machines_by_platform(){
     fi
   fi
 
-  check_platform="$(echo "$api_response" | jq -r --arg searched_platform "$platform" '.newData[] | select(.platform | test("\\b\($searched_platform)\\b"; "i"))')"
+  check_platform="$(echo "$api_response" | jq -r --arg searched_platform "$platform" '.newData[] | select((.platform | ascii_downcase) == ($searched_platform | ascii_downcase))')"
 
   if [ -n "$check_platform" ]; then
     echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Listando máquinas pertenecientes a la plataforma${endColour} ${blueColour}$platform${endColour}${grayColour}:${endColour}\n"
-    echo "$check_platform" | jq -r '.name' | sort | column
+    echo "$check_platform" | jq -r '.name | gsub("\n"; " ")' | sort | column
     echo -e "\n${yellowColour}[+]${endColour} Total de máquinas: ${greenColour}$(echo "$check_platform" | jq -r '.name' | wc -l)${endColour}"
   else
     echo -e "\n${redColour}[!]${endColour} ${grayColour}La plataforma indicada no existe${endColour}"
@@ -432,15 +430,17 @@ function get_machines_by_platform(){
   tput cnorm
 }
 
-function get_difficulty_os(){
-  difficulty="$1"
-  os="$2"
+function get_advanced_search(){
+  local difficulty="$1"
+  local os="$2"
+  local technique="$3"
+  local certification="$4"
+  local platform="$5"
   
   local api_response
   api_response=$(call_api)
   if [ $? -ne 0 ]; then
     if is_cache_valid; then
-        echo -e "${yellowColour}[i] Usando datos en caché debido a un error en la API.${endColour}"
         api_response=$(read_cache)
     else
         echo -e "${redColour}[!] No se pudo obtener la lista de máquinas y no hay caché válido.${endColour}"
@@ -448,14 +448,46 @@ function get_difficulty_os(){
     fi
   fi
 
-  check_machines="$(echo "$api_response" | jq -r --arg searched_difficulty "$difficulty" --arg searched_os "$os" '.newData[] | select(.state | test("\\b\($searched_difficulty)\\b"; "i")) | select(.os | test("\\b\($searched_os)\\b"; "i")) | .name')"
+  local jq_filter='.newData[]'
+  local filter_description=""
+
+  if [ -n "$difficulty" ]; then
+    jq_filter+=" | select((.state | ascii_downcase) == (\"$difficulty\" | ascii_downcase))"
+    filter_description+="dificultad ${blueColour}$difficulty${endColour}"
+  fi
+
+  if [ -n "$os" ]; then
+    jq_filter+=" | select((.os | ascii_downcase) == (\"$os\" | ascii_downcase))"
+    [ -n "$filter_description" ] && filter_description+=", "
+    filter_description+="sistema operativo ${blueColour}$os${endColour}"
+  fi
+
+  if [ -n "$technique" ]; then
+    jq_filter+=" | select(.techniques | split(\"\n\") | map(. | ascii_downcase) | contains([(\"$technique\" | ascii_downcase)]))"
+    [ -n "$filter_description" ] && filter_description+=", "
+    filter_description+="técnica ${blueColour}$technique${endColour}"
+  fi
+
+  if [ -n "$certification" ]; then
+    jq_filter+=" | select(.certification | split(\"\n\") | map(. | ascii_downcase) | contains([(\"$certification\" | ascii_downcase)]))"
+    [ -n "$filter_description" ] && filter_description+=", "
+    filter_description+="certificación ${blueColour}$certification${endColour}"
+  fi
+
+  if [ -n "$platform" ]; then
+    jq_filter+=" | select((.platform | ascii_downcase) == (\"$platform\" | ascii_downcase))"
+    [ -n "$filter_description" ] && filter_description+=", "
+    filter_description+="plataforma ${blueColour}$platform${endColour}"
+  fi
+
+  local check_machines="$(echo "$api_response" | jq -r "$jq_filter | .name | gsub(\"\n\"; \" \")")"
 
   if [ -n "$check_machines" ]; then
-    echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Listando máquinas de dificultad${endColour} ${blueColour}$difficulty${endColour} ${grayColour}que tengan el sistema operativo${endColour} ${blueColour}$os${endColour}${grayColour}:${endColour}\n"
+    echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Listando máquinas con $filter_description${grayColour}:${endColour}\n"
     echo "$check_machines" | sort | column
     echo -e "\n${yellowColour}[+]${endColour} Total de máquinas: ${greenColour}$(echo "$check_machines" | wc -l)${endColour}"
   else
-    echo -e "\n${redColour}[!]${endColour} ${grayColour}No se encontraron máquinas con la dificultad${endColour} ${blueColour}$difficulty${endColour} ${grayColour}y el sistema operativo${endColour} ${blueColour}$os${endColour}"
+    echo -e "\n${redColour}[!]${endColour} ${grayColour}No se encontraron máquinas que cumplan con los criterios especificados.${endColour}"
   fi
   tput cnorm
 }
@@ -610,6 +642,12 @@ _infosecmachines_autocomplete()
 
 declare -i a_flag=0 m_flag=0 i_flag=0 o_flag=0 d_flag=0 t_flag=0 c_flag=0 y_flag=0 p_flag=0 v_flag=0 u_flag=0 I_flag=0
 
+difficulty=""
+os=""
+technique=""
+certification=""
+platform=""
+
 tput civis; banner; while getopts ":am:i:o:d:t:c:y:p:vuhI" opt; do
   case $opt in
     a) a_flag=1;;
@@ -626,7 +664,7 @@ tput civis; banner; while getopts ":am:i:o:d:t:c:y:p:vuhI" opt; do
     d) difficulty="$OPTARG"; d_flag=1;;
     t)
       if [ "$OPTARG" == "-l" ]; then
-        t_flag=2  # Usamos 2 para indicar que queremos listar todas las técnicas
+        t_flag=2
       else
         technique="$OPTARG"
         t_flag=1
@@ -692,7 +730,9 @@ tput civis; banner; while getopts ":am:i:o:d:t:c:y:p:vuhI" opt; do
   esac
 done
 
-if [ $a_flag -eq 1 ]; then
+if (( d_flag + o_flag + t_flag + c_flag + p_flag > 1 )); then
+  get_advanced_search "$difficulty" "$os" "$technique" "$certification" "$platform"
+elif [ $a_flag -eq 1 ]; then
   all_machines
 elif [ $m_flag -eq 1 ]; then
   search_machine "$machine_name"
