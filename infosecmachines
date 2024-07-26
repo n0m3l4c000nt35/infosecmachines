@@ -25,18 +25,6 @@ function ctrl_c(){
   tput cnorm && exit 1
 }
 
-
-function check_dependencies() {
-  local deps=("curl" "jq" "column")
-  for dep in "${deps[@]}"; do
-    if ! command -v "$dep" &> /dev/null; then
-      echo -e "${redColour}[!] La dependencia $dep no está instalada.${endColour}"
-      echo -e "${yellowColour}[i] Por favor, instálela e intente de nuevo.${endColour}"
-      exit 1
-    fi
-  done
-}
-
 function is_cache_valid() {
     if [ ! -f "$CACHE_FILE" ]; then
         return 1
@@ -106,7 +94,6 @@ function check_jq() {
 trap 'error_handler $LINENO' ERR
 trap ctrl_c INT
 check_jq
-check_dependencies
 
 function banner(){
   echo -e "${redColour}
@@ -139,7 +126,7 @@ function help_panel(){
 }
 
 function get_version(){
-  echo -e "\n${yellowColour}[+]${endColour} v1.0.0"
+  echo -e "\n${yellowColour}[+]${endColour} v1.1.0"
   tput cnorm
 }
 
@@ -587,59 +574,6 @@ function interactive_mode() {
     done
 }
 
-_infosecmachines_autocomplete()
-{
-    local cur prev opts
-    COMPREPLY=()
-    cur="${COMP_WORDS[COMP_CWORD]}"
-    prev="${COMP_WORDS[COMP_CWORD-1]}"
-    opts="-a -m -i -o -d -t -c -y -p -v -u -I -h"
-
-    case "${prev}" in
-        -m|-y)
-            local machines
-            machines=$(call_api | jq -r '.newData[].name | gsub("\n"; " ")' 2>/dev/null)
-            COMPREPLY=( $(compgen -W "${machines}" -- ${cur}) )
-            return 0
-            ;;
-        -i)
-            local ips
-            ips=$(call_api | jq -r '.newData[].ip' 2>/dev/null)
-            COMPREPLY=($(compgen -W "${ips}" -- ${cur}))
-            return 0
-            ;;
-        -o)
-            COMPREPLY=($(compgen -W "Linux Windows" -- ${cur}))
-            return 0
-            ;;
-        -d)
-            COMPREPLY=($(compgen -W "Easy Medium Hard Insane" -- ${cur}))
-            return 0
-            ;;
-        -t)
-            local techniques
-            techniques=$(call_api | jq -r '.newData[].techniques' | tr '\n' ' ' 2>/dev/null)
-            COMPREPLY=($(compgen -W "${techniques}" -- ${cur}))
-            return 0
-            ;;
-        -c)
-            local certifications
-            certifications=$(call_api | jq -r '.newData[].certification | gsub("\n"; " ")' 2>/dev/null)
-            COMPREPLY=($(compgen -W "${certifications}" -- ${cur}))
-            return 0
-            ;;
-        -p)
-            COMPREPLY=($(compgen -W "HackTheBox VulnHub PortSwigger" -- ${cur}))
-            return 0
-            ;;
-        *)
-            ;;
-    esac
-
-    COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
-    return 0
-}
-
 declare -i a_flag=0 m_flag=0 i_flag=0 o_flag=0 d_flag=0 t_flag=0 c_flag=0 y_flag=0 p_flag=0 v_flag=0 u_flag=0 I_flag=0
 
 difficulty=""
@@ -720,7 +654,7 @@ tput civis; banner; while getopts ":am:i:o:d:t:c:y:p:vuhI" opt; do
         y)
           echo -e "\n${redColour}[!]${endColour} Ingresa el nombre de la máquina"
           echo -e "\n${yellowColour}[+]${endColour} Uso:\n\t./infosecmachines.sh -y ${blueColour}<maquina>${endColour}"
-          echo -e "\t./infosecmachines.sh -y ${blueColour}\"<máquina> <buscada>\"${endColour}\tIngresa el nombre de la máquina entre comillas si involucra más de una palabra"
+          echo -e "\tcomplete -F _infosecmachines_autocomplete ./infosecmachines./infosecmachines.sh -y ${blueColour}\"<máquina> <buscada>\"${endColour}\tIngresa el nombre de la máquina entre comillas si involucra más de una palabra"
           exit 1;;
         p)
           echo -e "\n${redColour}[!]${endColour} Ingresa la plataforma: ${purpleColour}HackTheBox${endColour} | ${purpleColour}VulnHub${endColour} | ${purpleColour}PortSwigger${endColour}"
@@ -765,7 +699,5 @@ elif [ $v_flag -eq 1 ]; then
 else
   help_panel
 fi
-
-complete -F _infosecmachines_autocomplete ./infosecmachines
 
 ### n0m3l4c000nt35 ###
