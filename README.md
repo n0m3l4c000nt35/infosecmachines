@@ -32,7 +32,7 @@ sudo wget -O /usr/bin/infosecmachines https://raw.githubusercontent.com/n0m3l4c0
 ## Permisos
 
 ```shell
-chmod +x infosecmachines
+sudo chmod +x /usr/bin/infosecmachines
 ```
 
 ## Uso
