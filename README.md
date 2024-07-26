@@ -25,8 +25,8 @@
 ## Descarga
 
 ```shell
-wget -P /usr/bin/ https://raw.githubusercontent.com/n0m3l4c000nt35/infosecmachines/main/infosecmachines
-wget -O /usr/bin/infosecmachines https://raw.githubusercontent.com/n0m3l4c000nt35/infosecmachines/main/infosecmachines
+sudo wget -P /usr/bin/ https://raw.githubusercontent.com/n0m3l4c000nt35/infosecmachines/main/infosecmachines
+sudo wget -O /usr/bin/infosecmachines https://raw.githubusercontent.com/n0m3l4c000nt35/infosecmachines/main/infosecmachines
 ```
 
 ## Permisos
