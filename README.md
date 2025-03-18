@@ -1,5 +1,7 @@
 # InfoSecMachines
 
+![help](https://github.com/user-attachments/assets/7dd346d2-0cc0-4487-b4b2-c2ebdf06a241)
+
 ## Características
 
 - Listar todas las máquinas disponibles
